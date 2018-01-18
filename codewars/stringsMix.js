@@ -37,37 +37,76 @@ s2 = "my frie n d Joh n has ma n y ma n y frie n ds n&"
 mix(s1, s2) --> "1:mmmmmm/=:nnnnnn/1:aaaa/1:hhh/2:yyy/2:dd/2:ff/2:ii/2:rr/E:ee/E:ss"
 */
 
-function mix(s1, s2) {
-  // your code
-  const s1 = {}; 
-  const s2 = {};
+/*
 
-  const cleanS1 = s1.replace(/[^a-z]/g, '').split('');
-  const cleanS2 = s2.replace(/[^a-z]/g, '').split('');
+Steps:
+- receive two strings as input.
+- for each string
+    - filter into lowercase characters only (not a conversion)
+    - split string into letters
+    - count occurences of each letter and record in hashTable
 
-  cleanS1.forEach(letter => {
-    if ( s1.hasOwnProperty[letter] ) {
-      s1[letter]++; 
-    } else {
-      s1[letter] = 1;
-    }
-  });
+- combine hashtables to decipher which letters to keep from which string
+    - letters need to occur more than once
+    - if equal record for both strings
+    - Need to iterate over one characters keys
+      - check for presence of key in other object
+      - if exists, compare value, keep highest.
+      - if not exists and above 1 keep.
 
-  cleanS2.forEach(letter => {
-    if ( s2.hasOwnProperty[letter] ) {
-      s2[letter]++; 
-    } else {
-      s2[letter] = 1;
-    }
-  });
+- sort string into largest by length, then alphabet
+
+- render string
+
+
+*/
+
+/* Assertion statements */
+function logger(s, a, e, t) {
+  s
+    ? console.log(`passed [${t}]`)
+    : console.log(`FAILED [${t}] Expected ${e}, but received ${a}`);
+}
+function assertEquals(a, e, t) {
+  logger(a === e, a, e, t);
+}
+function assertArrayEquals(a, e, t) {
+  return logger(
+    a.length === e.length && a.toString() === e.toString(), 
+    a, 
+    e, 
+    t
+  );
+}
+
+function mix(...strings) {
+  
+}
+/**
+ * takes a string and filters for non-lowercase characters and 
+ * returns an array of the characters present
+ * @function filterAndSplitString
+ * @param {String} str - takes a string of characters
+ * @return {Array} - returns array of lowercase characters
+ */
+function filterAndSplitString(str) {
+  return str.replace(/[^a-z]/g, '').split('');
+}
+
+assertArrayEquals(filterAndSplitString('Hello Timmy!'), ['e','l','l','o','i','m','m','y'], 'should filter out non lowercase letters and return an array');
+
+/**
+ * takes an array and counts how often each character
+ * occurs, by recording in an object. 
+ * @function countLetters
+ * @param {Array} arr
+ * @return {Object}
+ */
+function countLetters(arr) {
 
 }
 
-function assertEquals(a, e, testName) {
-  return a === e
-    ? console.log(`passed [${testName}]`)
-    : console.log(`FAILED [${testName}] Expected ${e} but got ${a}`);
-}
+// Basic Tests
 
 assertEquals(mix("Are they here", "yes, they are here"), "2:eeeee/2:yy/=:hh/=:rr")
 assertEquals(mix("looping is fun but dangerous", "less dangerous than coding"), "1:ooo/1:uuu/2:sss/=:nnn/1:ii/2:aa/2:dd/2:ee/=:gg")
