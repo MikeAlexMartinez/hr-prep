@@ -143,9 +143,6 @@ function mix(s1, s2) {
 function filterAndSplitString(str) {
   return str.replace(/[^a-z]/g, '').split('');
 }
-
-assertArrayEquals(filterAndSplitString('Hello Timmy!'), ['e','l','l','o','i','m','m','y'], 'should filter out non lowercase letters and return an array');
-
 /**
  * takes an array and counts how often each character
  * occurs, by recording in an object. 
@@ -164,17 +161,6 @@ function countLetters(arr) {
 
   return hashTable;
 }
-
-assertDeepEquals(countLetters(['e','l','l','o','i','m','m','y']), {'e': 1, 'l': 2, 'o': 1, 'i': 1, 'm': 2, 'y': 1}, 'should return an object which counts occurrences of certain letters');
-/*
-- combine hashtables to decipher which letters to keep from which string
-- letters need to occur more than once
-- if equal record for both strings
-- Need to iterate over one characters keys
-  - check for presence of key in other object
-  - if exists, compare value, keep highest.
-  - if not exists and above 1 keep.
-*/
 /**
  * Combine counts - takes two hashTables in an array and returns single array,
  * with each array item consisting of a {letter, letterCount, string}
@@ -241,6 +227,73 @@ function combineCounts([s1,s2]) {
     });
   }
 }
+function sortArray(a,b) {
+  
+  aLetter = a.letter;
+  aCount = a.letterCount;
+  bLetter = b.letter;
+  bCount = b.letterCount;
+  aType = a.string;
+  bType = b.string;
+  
+  // sort by count
+  if (bCount > aCount) {
+    return 1;
+  } else  if (aCount > bCount) {
+    return -1;
+  }
+  // sort by type
+  if (bType > aType) {
+    return -1;
+  } else if (aType > bType) {
+    return 1;
+  }
+  
+  // sort by letter
+  if (bLetter > aLetter) {
+    return -1;
+  } else if (aLetter > bLetter) {
+    return 1;
+  }
+  
+  // else keep same
+  return 0;
+};
+/**
+ * Takes an array and renders a string showing how many characters 
+ * where in which string the most.
+ * @function renderString
+ * @param {Array.<{letter: String, letterCount: Number, string: String}>} letters
+ * @return {String} 
+ */
+function renderString(letters) {
+
+  return letters.map(l => {
+    return `${l.string}:${createLetterString(l.letter, l.letterCount)}`;
+  }).join('/');
+
+}
+/**
+ * takes a single character and n and returns a string
+ * with the character repeated 'n' times;
+ * @function createLetterString
+ * @param {String} letter 
+ * @param {Number} count
+ * @return {String} 
+ */
+function createLetterString(letter, count) {
+  let retStr = '';
+  for(let i = 0; i < count; i++) {
+    retStr += letter;
+  }
+  return retStr;
+}
+
+assertArrayEquals(filterAndSplitString('Hello Timmy!'), ['e','l','l','o','i','m','m','y'], 'should filter out non lowercase letters and return an array');
+
+
+assertDeepEquals(countLetters(['e','l','l','o','i','m','m','y']), {'e': 1, 'l': 2, 'o': 1, 'i': 1, 'm': 2, 'y': 1}, 'should return an object which counts occurrences of certain letters');
+
 
 const countOne = {
   a: 3,
@@ -289,38 +342,6 @@ const expectedCombined = [
 const testArr = [countOne, countTwo];
 assertDeepEquals(combineCounts(testArr), expectedCombined, 'should correctly combine the two hashTables and send back an array');
 
-function sortArray(a,b) {
-  
-  aLetter = a.letter;
-  aCount = a.letterCount;
-  bLetter = b.letter;
-  bCount = b.letterCount;
-  aType = a.string;
-  bType = b.string;
-
-  // sort by count
-  if (bCount > aCount) {
-    return 1;
-  } else  if (aCount > bCount) {
-    return -1;
-  }
-  // sort by type
-  if (bType > aType) {
-    return -1;
-  } else if (aType > bType) {
-    return 1;
-  }
-  
-  // sort by letter
-  if (bLetter > aLetter) {
-    return -1;
-  } else if (aLetter > bLetter) {
-    return 1;
-  }
-
-  // else keep same
-  return 0;
-};
 
 const expectedSortedArray = [
   {
@@ -352,38 +373,9 @@ const expectedSortedArray = [
 
 assertDeepEquals(expectedCombined.sort(sortArray),expectedSortedArray,'should sort letter by count then by alphabet');
 
-/**
- * Takes an array and renders a string showing how many characters 
- * where in which string the most.
- * @function renderString
- * @param {Array.<{letter: String, letterCount: Number, string: String}>} letters
- * @return {String} 
- */
-function renderString(letters) {
-
-  return letters.map(l => {
-    return `${l.string}:${createLetterString(l.letter, l.letterCount)}`;
-  }).join('/');
-
-}
 
 assertEquals(renderString(expectedSortedArray), '2:ccccc/1:aaa/=:bbb/2:dd/1:ee', 'should render a string from the passed array')
 
-/**
- * takes a single character and n and returns a string
- * with the character repeated 'n' times;
- * @function createLetterString
- * @param {String} letter 
- * @param {Number} count
- * @return {String} 
- */
-function createLetterString(letter, count) {
-  let retStr = '';
-  for(let i = 0; i < count; i++) {
-    retStr += letter;
-  }
-  return retStr;
-}
 // Basic Tests
 
 assertEquals(mix("Are they here", "yes, they are here"), "2:eeeee/2:yy/=:hh/=:rr")
