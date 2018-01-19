@@ -17,13 +17,21 @@ NOTE: In PHP the function is called series_sum().
 
 */
 
-function SeriesSum(n)
+function assertEquals(a, e, testName) {
+  a === e
+    ? console.log(`passed [${testName}]`)
+    : console.log(`FAILED [${testName}] expected ${e} but got ${a}`);
+}
+
+function SeriesSum(n, total=0)
 {
-  // Happy Coding ^_^
+  return n === 0
+    ? parseFloat(total).toFixed(2).toString()
+    : SeriesSum(n-1, total += (1 / (n * 3 - 2)));
 }
 
 
-assertEquals(SeriesSum(1), "1.00")
-assertEquals(SeriesSum(2), "1.25")
-assertEquals(SeriesSum(3), "1.39")
-assertEquals(SeriesSum(4), "1.49")
+assertEquals(SeriesSum(1), "1.00", 'test One');
+assertEquals(SeriesSum(2), "1.25", 'test two')
+assertEquals(SeriesSum(3), "1.39", 'test three')
+assertEquals(SeriesSum(4), "1.49", 'test four')

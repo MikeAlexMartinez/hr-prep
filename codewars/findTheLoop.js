@@ -17,8 +17,9 @@
  Don't miss dmitry's article in the discussion after you pass the Kata !!
 */
 
-function Node() {
+function Node(i) {
   this.next = undefined;
+  this.count = i;
 }
 Node.prototype.getNext = function() {
   return this.next;
@@ -28,7 +29,8 @@ Node.prototype.setNext = function(node) {
 }
 
 function constructLoop(totalNodes, tailSize) {
-  let startNode = new Node();
+  let i = 1;
+  let startNode = new Node(i++);
   let loopNode, nextNode;
   let currentNode = startNode;
   
@@ -36,7 +38,7 @@ function constructLoop(totalNodes, tailSize) {
   tailSize--;
 
   while (tailSize >= 0) {
-    nextNode = new Node();
+    nextNode = new Node(i++);
 
     currentNode.setNext(nextNode);
     currentNode = nextNode;
@@ -48,7 +50,7 @@ function constructLoop(totalNodes, tailSize) {
   loopNode = currentNode;
 
   while (totalNodes > 0) {
-    nextNode = new Node();
+    nextNode = new Node(i++);
     
     currentNode.setNext(nextNode);
     currentNode = nextNode;
@@ -64,7 +66,7 @@ function constructLoop(totalNodes, tailSize) {
 // test loop
 const startNode = constructLoop(14, 3);
 
-function loopSize(node){
+function loopSizeMutated(node){
   
   let loopDetected = false;
   let loopCount = 0;
@@ -132,4 +134,61 @@ function assertEquals(a, e, t) {
     : console.log(`FAILED [${t}] Expected ${e} but got ${a}`);
 }
 
-assertEquals(loopSize(startNode), 11, 'should find length of loop present in linked list');
+assertEquals(loopSizeMutated(startNode), 11, 'should find length of loop present in linked list - Mutable');
+
+function loopSizeImmutable(startNode) {
+
+  return countLoop(detectLoop(startNode));
+  
+  function countLoop(node) {
+    
+    let currentNode = node.getNext();
+    let nodeCount = 1;
+
+    while (currentNode !== node) {
+      currentNode = currentNode.getNext();
+      nodeCount++;
+    }
+
+    return nodeCount;
+  }
+  
+  function detectLoop(node) {
+    let bunny = node;
+    let hare = bunny.getNext();
+    let loopDetected = false;
+
+    while (!loopDetected) {
+
+      bunny = bunny.getNext();
+      hare = hare.getNext();
+
+      if ( bunny.getNext() === node.getNext() ) {
+        loopDetected = true;
+      }
+
+      hare = hare.getNext();
+    }
+
+    return bunny;
+  }
+}
+
+// test loop
+const newNode = constructLoop(5, 1);
+
+assertEquals(loopSizeMutated(newNode), 4, 'should find length of loop present in linked list - Mutable');
+assertEquals(loopSizeImmutable(newNode), 4, 'should find length of loop present in linked list - Immutable');
+
+function loop_size_array(node) {
+  let nodes = [];
+  
+  while(nodes.indexOf(node) === -1) {
+    nodes.push(node);
+    node = node.getNext();
+  }
+
+  return nodes.length - nodes.indexOf(node);
+}
+
+assertEquals(loop_size_array(newNode), 4, 'should find length of loop present in linked list - Array');
