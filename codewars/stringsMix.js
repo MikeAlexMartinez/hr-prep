@@ -291,10 +291,35 @@ assertDeepEquals(combineCounts(testArr), expectedCombined, 'should correctly com
 
 function sortArray(a,b) {
   
+  aLetter = a.letter;
   aCount = a.letterCount;
+  bLetter = b.letter;
   bCount = b.letterCount;
+  aType = a.string;
+  bType = b.string;
 
-  return bCount - aCount;
+  // sort by count
+  if (bCount > aCount) {
+    return 1;
+  } else  if (aCount > bCount) {
+    return -1;
+  }
+  // sort by type
+  if (bType > aType) {
+    return -1;
+  } else if (aType > bType) {
+    return 1;
+  }
+  
+  // sort by letter
+  if (bLetter > aLetter) {
+    return -1;
+  } else if (aLetter > bLetter) {
+    return 1;
+  }
+
+  // else keep same
+  return 0;
 };
 
 const expectedSortedArray = [
@@ -337,10 +362,8 @@ assertDeepEquals(expectedCombined.sort(sortArray),expectedSortedArray,'should so
 function renderString(letters) {
 
   return letters.map(l => {
-      return `${l.string}:${createLetterString(l.letter, l.letterCount)}`;
-    })
-    .sort((a,b) => a - b )
-    .join('/');
+    return `${l.string}:${createLetterString(l.letter, l.letterCount)}`;
+  }).join('/');
 
 }
 
