@@ -17,10 +17,8 @@
  Don't miss dmitry's article in the discussion after you pass the Kata !!
 */
 
-function Node(i, tag) {
+function Node() {
   this.next = undefined;
-  this.count = i;
-  this.tag = tag;
 }
 Node.prototype.getNext = function() {
   return this.next;
@@ -28,15 +26,9 @@ Node.prototype.getNext = function() {
 Node.prototype.setNext = function(node) {
   this.next = node;
 }
-Node.prototype.setTag = function(tag) {
-  this.tag = tag;
-}
 
-function constructLoop(loopSize, tailSize) {
-  let totalNodes = loopSize;
-  let nodeCount = 1;
-  let startNode = new Node(nodeCount, 'start');
-  nodeCount++;
+function constructLoop(totalNodes, tailSize) {
+  let startNode = new Node();
   let loopNode, nextNode;
   let currentNode = startNode;
   
@@ -44,8 +36,7 @@ function constructLoop(loopSize, tailSize) {
   tailSize--;
 
   while (tailSize >= 0) {
-    nextNode = new Node(nodeCount, 'tail');
-    nodeCount++;
+    nextNode = new Node();
 
     currentNode.setNext(nextNode);
     currentNode = nextNode;
@@ -55,11 +46,9 @@ function constructLoop(loopSize, tailSize) {
   }
 
   loopNode = currentNode;
-  loopNode.setTag('loopStart');
 
   while (totalNodes > 0) {
-    nextNode = new Node(nodeCount++, 'loop');
-    nodeCount++;
+    nextNode = new Node();
     
     currentNode.setNext(nextNode);
     currentNode = nextNode;
@@ -70,43 +59,42 @@ function constructLoop(loopSize, tailSize) {
   nextNode.setNext(loopNode);
   
   return startNode;
-
 }
 
 // test loop
-const startNode = constructLoop(11, 3);
+const startNode = constructLoop(14, 3);
 
-function loopSize(startNode){
-  
-  let currentNode = node;
-  currentNode.label = 'once';
-
-  console.log(currentNode.tag, currentNode.count);
-
-  let nextNode = node.getNext();
+function loopSize(node){
   
   let loopDetected = false;
   let loopCount = 0;
   let loopCalced = false;
+  let currentNode = node;
+  currentNode.label = 'once';
+  let nextNode = node.getNext();
   
   while(!loopCalced) {
     if (nextNode.label && !loopDetected) {
       loopDetected = true;
       loopCount = 1;
-      currentNode.tag = 'stop';
+      currentNode.label = 'stop';
     }
     
     currentNode = nextNode;
 
-    console.log(currentNode.tag, currentNode.count);
-    
+    if (!loopDetected) {
+      currentNode.label = 'once';
+    }
+
     nextNode = currentNode.getNext();
 
-    if (!currentNode.label === 'stop'){
-      loopCount++;
-      currentNode.label = 'twice';
-    } else {
-      loopCalced = true;
+    if (loopDetected) {
+      if (currentNode.label !== 'stop') {
+        loopCount++;
+        currentNode.label = 'twice';
+      } else {
+        loopCalced = true;
+      }
     }
 
   }
@@ -144,4 +132,4 @@ function assertEquals(a, e, t) {
     : console.log(`FAILED [${t}] Expected ${e} but got ${a}`);
 }
 
-assertEquals(loopSize(startNode), 7, 'should find length of loop present in linked list');
+assertEquals(loopSize(startNode), 11, 'should find length of loop present in linked list');
