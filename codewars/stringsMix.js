@@ -65,7 +65,7 @@ Steps:
 function logger(s, a, e, t) {
   s
     ? console.log(`passed [${t}]`)
-    : console.log(`FAILED [${t}] Expected ${e}, but received ${a}`);
+    : console.log(`FAILED [${t}] Expected ${e}, but received ${a})}`);
 }
 function assertEquals(a, e, t) {
   logger(a === e, a, e, t);
@@ -78,9 +78,60 @@ function assertArrayEquals(a, e, t) {
     t
   );
 }
+function assertDeepEquals(a, e, t) {
+  return logger(equal(a,e), a.toString(), e.toString(), t);
 
-function mix(...strings) {
+  function equal(a, b) {
+    if (a === b) return true
+
+    // test arrays
+    const arrA = Array.isArray(a);
+    const arrB = Array.isArray(b);
+    if( arrA && arrB ) {
+      if (a.length !== b.length) return false;
+      for( let i = 0 ; i < a.length; i++) {
+        if ( !equal(a[i], b[i]) ) return false;
+      }
+      return true;
+    }
+    if ( arrA !== arrB ) return false;
+    
+    // test objects
+    if (a && b && typeof a === 'object' && typeof b === 'object') {
+      const keys  = Object.keys(a);
+
+      // check length
+      if ( keys.length !== Object.keys(b).length ) return false;
+
+      // check presence
+      keys.forEach(key => {
+        if ( !b.hasOwnProperty(key) ) return false;
+      });
+
+      // check values
+      keys.forEach(key => {
+        if ( !equal( a[key], b[key] ) ) return false;
+      });
+
+      return true;
+    }
+
+    return false;
+  }
+}
+
+function mix(s1, s2) {
   
+  const s1Array = filterAndSplitString(s1);
+  const s1Table = countLetters(s1Array);
+
+  const s2Array = filterAndSplitString(s2);
+  const s2Table = countLetters(s2Array);
+
+  const counts = combineCounts([s1Table, s2Table]).sort(sortArray);
+
+  return renderString(counts);
+
 }
 /**
  * takes a string and filters for non-lowercase characters and 
@@ -103,9 +154,213 @@ assertArrayEquals(filterAndSplitString('Hello Timmy!'), ['e','l','l','o','i','m'
  * @return {Object}
  */
 function countLetters(arr) {
+  let hashTable = {};
+
+  arr.forEach(letter => {
+    hashTable.hasOwnProperty(letter)
+      ? hashTable[letter]++
+      : hashTable[letter] = 1;
+  });
+
+  return hashTable;
+}
+
+assertDeepEquals(countLetters(['e','l','l','o','i','m','m','y']), {'e': 1, 'l': 2, 'o': 1, 'i': 1, 'm': 2, 'y': 1}, 'should return an object which counts occurrences of certain letters');
+/*
+- combine hashtables to decipher which letters to keep from which string
+- letters need to occur more than once
+- if equal record for both strings
+- Need to iterate over one characters keys
+  - check for presence of key in other object
+  - if exists, compare value, keep highest.
+  - if not exists and above 1 keep.
+*/
+/**
+ * Combine counts - takes two hashTables in an array and returns single array,
+ * with each array item consisting of a {letter, letterCount, string}
+ * @function combineCounts
+ * @param {Array} arr - array with two hashTables as entries
+ * @return {Array}
+ */
+function combineCounts([s1,s2]) {
+  let returnArray = [];
+
+  Object.keys(s1).forEach(key => {
+    let val = s1[key];
+    // check value greater than 1
+    if (val > 1) {
+      // compare with other s2
+      if (s2.hasOwnProperty(key)) {
+        // create entry in returnArray
+        if( s2[key] > val ) {
+          addToReturnArray(key, s2[key], '2');
+        } else if (s2[key] === val ) {
+          addToReturnArray(key, val, '=');
+        } else {
+          addToReturnArray(key, val, '1');
+        }
+
+        // remove key from s2 to prevent 
+        // double entries into return Array
+        delete s2[key];
+      } else {
+        // create entry in returnArray
+        addToReturnArray(key, val, '1');
+      }
+    }
+  });
+
+  Object.keys(s2).forEach(key => {
+    let val = s2[key];
+    // check value greater than 1
+    if (val > 1) {
+      // compare with other s2
+      if (s1.hasOwnProperty(key)) {
+        // create entry in returnArray
+        if( s1[key] > val ) {
+          addToReturnArray(key, s2[key], '1');
+        } else if (s1[key] === val ) {
+          addToReturnArray(key, val, '=');
+        } else {
+          addToReturnArray(key, val, '2');
+        }
+      } else {
+        // create entry in returnArray
+        addToReturnArray(key, val, '2');
+      }
+    }
+  });
+
+  return returnArray;
+
+  function addToReturnArray(key, count, string) {
+    returnArray.push({
+      letter: key,
+      letterCount: count,
+      string: string
+    });
+  }
+}
+
+const countOne = {
+  a: 3,
+  b: 3,
+  c: 4,
+  e: 2,
+  f: 1
+};
+
+const countTwo = {
+  a: 2,
+  b: 3,
+  c: 5,
+  d: 2,
+  g: 1,
+}
+
+const expectedCombined = [
+  {
+    letter: 'a',
+    letterCount: 3,
+    string: '1'
+  },
+  {
+    letter: 'b',
+    letterCount: 3,
+    string: '='
+  },
+  {
+    letter: 'c',
+    letterCount: 5,
+    string: '2'
+  },
+  {
+    letter: 'd',
+    letterCount: 2,
+    string: '2'
+  },
+  {
+    letter: 'e',
+    letterCount: 2,
+    string: '1'
+  }
+];
+
+const testArr = [countOne, countTwo];
+assertDeepEquals(combineCounts(testArr), expectedCombined, 'should correctly combine the two hashTables and send back an array');
+
+function sortArray(a,b) {
+  
+  aCount = a.letterCount;
+  bCount = b.letterCount;
+
+  return bCount - aCount;
+};
+
+const expectedSortedArray = [
+  {
+    letter: 'c',
+    letterCount: 5,
+    string: '2'
+  },
+  {
+    letter: 'a',
+    letterCount: 3,
+    string: '1'
+  },
+  {
+    letter: 'b',
+    letterCount: 3,
+    string: '='
+  },
+  {
+    letter: 'd',
+    letterCount: 2,
+    string: '2'
+  },
+  {
+    letter: 'e',
+    letterCount: 2,
+    string: '1'
+  }
+];
+
+assertDeepEquals(expectedCombined.sort(sortArray),expectedSortedArray,'should sort letter by count then by alphabet');
+
+/**
+ * Takes an array and renders a string showing how many characters 
+ * where in which string the most.
+ * @function renderString
+ * @param {Array.<{letter: String, letterCount: Number, string: String}>} letters
+ * @return {String} 
+ */
+function renderString(letters) {
+
+  return letters.map(l => {
+      return `${l.string}:${createLetterString(l.letter, l.letterCount)}`;
+    })
+    .sort((a,b) => a - b )
+    .join('/');
 
 }
 
+assertEquals(renderString(expectedSortedArray), '2:ccccc/1:aaa/=:bbb/2:dd/1:ee', 'should render a string from the passed array')
+
+/**
+ * takes a single character and n and returns a string
+ * with the character repeated 'n' times;
+ * @function createLetterString
+ * @param {String} letter 
+ * @param {Number} count
+ * @return {String} 
+ */
+function createLetterString(letter, count) {
+  let retStr = '';
+  for(let i = 0; i < count; i++) {
+    retStr += letter;
+  }
+  return retStr;
+}
 // Basic Tests
 
 assertEquals(mix("Are they here", "yes, they are here"), "2:eeeee/2:yy/=:hh/=:rr")
